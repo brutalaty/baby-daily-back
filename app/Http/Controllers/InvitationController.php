@@ -60,18 +60,46 @@ class InvitationController extends Controller
     /**
      * Accept an invitation and place the user into the family that invited them
      */
-    public function update(UpdateInvitationRequest $request, Invitation $invitation): Responsable
+    public function update(UpdateInvitationRequest $request, Invitation $invitation): mixed
     {
         $status = $request->validated()['status'];
         $this->authorize('update', [$invitation, $status]);
 
+        if ($status == config('invitations.status.accepted')) {
+            return $this->accept($invitation);
+        }
+        if ($status == config('invitations.status.declined')) {
+            return $this->decline($invitation);
+        }
+        if ($status == config('invitations.status.canceled')) {
+            return $this->cancel($invitation);
+        }
+    }
+
+    private function accept($invitation)
+    {
         $invitation->family->addAdult(auth()->user(), $invitation->relation);
 
-        $invitation->status = $status;
+        $invitation->status = config('invitations.status.accepted');
         $invitation->save();
 
         $family = $invitation->family;
-
         return new FamilyResource($family);
+    }
+
+    private function decline($invitation)
+    {
+        $invitation->status = config('invitations.status.declined');
+        $invitation->save();
+
+        return response()->noContent();
+    }
+
+    private function cancel($invitation)
+    {
+        $invitation->status = config('invitations.status.canceled');
+        $invitation->save();
+
+        return response()->noContent();
     }
 }
