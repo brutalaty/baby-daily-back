@@ -53,12 +53,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->only(['store', 'show', 'update'])
         ->shallow();
 
-
-
     //invitations
-    Route::post('/invitations/{invitation}', [InvitationController::class, 'accept'])->name('invitations.accept');
-    //invitation/{:invitation}/decline
     Route::post('/families/{family}/invitations', [InvitationController::class, 'store'])->name('families.invitations.store');
     Route::apiResource('invitations', InvitationController::class)
-        ->only(['index', 'destroy']);
+        ->only(['index', 'update']);
 });

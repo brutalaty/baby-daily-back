@@ -27,7 +27,7 @@ class AcceptInvitationTest extends TestCase
     Mail::fake();
     $this->manager = $this->createUser();
     $this->family = $this->manager->createFamily(fake()->lastName(), 'Father');
-    $this->invitation = $this->family->inviteAdult($this->manager, fake()->unique()->safeEmail(), fake()->name());
+    $this->invitation = $this->family->inviteAdult($this->manager, fake()->unique()->safeEmail(), fake()->name(), 'Uncle');
 
     $this->user = $this->createUser(['email' => $this->invitation->email]);
   }
@@ -35,24 +35,29 @@ class AcceptInvitationTest extends TestCase
   /** @test */
   public function a_guest_cannot_accept_an_invitation()
   {
-    $this->postJson(route('invitations.accept', $this->invitation), ['role' => 'Mother'])->assertUnauthorized();
+    $this->patchJson(route('invitations.update', $this->invitation), [
+      'status' => config('invitations.status.accepted')
+    ])->assertUnauthorized();
   }
 
   /** @test */
   public function a_user_cannot_accept_an_invitation_that_is_not_for_them()
   {
-    $wrongUser = $this->createUser();
-    $this->actingAs($wrongUser);
+    $this->actingAs($this->createUser());
 
-    $this->postJson(route('invitations.accept', $this->invitation), ['relation' => 'Mother'])->assertForbidden();
+    $this->patchJson(route('invitations.update', $this->invitation), [
+      'status' => config('invitations.status.accepted')
+    ])->assertForbidden();
   }
 
   /** @test */
-  public function the_managaer_of_a_families_invitation_cannot_accept_the_invitation()
+  public function the_manager_of_a_families_invitation_cannot_accept_the_invitation()
   {
     $this->actingAs($this->manager);
 
-    $this->postJson(route('invitations.accept', $this->invitation), ['relation' => 'Mother'])->assertForbidden();
+    $this->patchJson(route('invitations.update', $this->invitation), [
+      'status' => config('invitations.status.accepted')
+    ])->assertForbidden();
   }
 
   /** @test */
@@ -60,25 +65,44 @@ class AcceptInvitationTest extends TestCase
   {
     $this->actingAs($this->user);
 
-    $response = $this->postJson(route('invitations.accept', $this->invitation), ['relation' => 'Mother']);
+    $response = $this->patchJson(route('invitations.update', $this->invitation), ['status' => config('invitations.status.accepted')]);
 
     $response->assertSuccessful();
 
-    $this->family->refresh();
-    $this->assertTrue($this->family->adults->contains($this->user));
+    $this->assertTrue($this->family->fresh()->adults->contains($this->user));
+    $this->assertTrue($this->invitation->fresh()->status == config('invitations.status.accepted'));
   }
 
   /** @test */
-  public function when_a_user_accepts_an_invitation_it_deletes_the_invitation()
+  public function a_user_cannot_accept_an_expired_invitation()
+  {
+    $this->actingAs($this->user);
+    $this->invitation->status = config('invitations.status.unaccepted');
+    $this->invitation->expiration = now()->subMonth();
+    $this->invitation->save();
+
+    $this->patchJson(route('invitations.update', $this->invitation), ['status' => config('invitations.status.accepted')])->assertForbidden();
+  }
+
+  /** @test */
+  public function a_user_cannot_accept_an_invitation_that_does_not_have_the_status_unaccepted()
   {
     $this->actingAs($this->user);
 
-    $response = $this->postJson(route('invitations.accept', $this->invitation), ['relation' => 'Mother']);
+    $canceled = $this->createInvitation(config('invitations.status.canceled'));
+    $declined = $this->createInvitation(config('invitations.status.declined'));
+    $accepted = $this->createInvitation(config('invitations.status.accepted'));
 
-    $response->assertSuccessful();
+    $this->patchJson(route('invitations.update', $canceled), ['status' => config('invitations.status.accepted')])->assertForbidden();
+    $this->patchJson(route('invitations.update', $declined), ['status' => config('invitations.status.accepted')])->assertForbidden();
+    $this->patchJson(route('invitations.update', $accepted), ['status' => config('invitations.status.accepted')])->assertForbidden();
+  }
 
-    $this->assertDatabaseMissing('invitations', [
-      'email' => $this->user->email,
-    ]);
+  private function createInvitation(String $status)
+  {
+    $invitation =  $this->family->inviteAdult($this->manager, $this->user->email, fake()->name(), 'Uncle');
+    $invitation->status = $status;
+    $invitation->save();
+    return $invitation;
   }
 }

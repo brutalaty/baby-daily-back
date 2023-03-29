@@ -1,0 +1,1 @@
+fwrite(STDERR, print_r(fake()->email(), TRUE));

@@ -22,6 +22,7 @@ class ViewInvitationTest extends TestCase
   protected User $manager;
   protected Family $family;
   protected Invitation $invitation;
+  protected String $relation = 'Aunty';
 
 
   public function setUp(): void
@@ -30,7 +31,7 @@ class ViewInvitationTest extends TestCase
     Mail::fake();
     $this->manager = $this->createUser();
     $this->family = $this->manager->createFamily(fake()->lastName(), 'Father');
-    $this->invitation = $this->family->inviteAdult($this->manager, fake()->email(), fake()->name());
+    $this->invitation = $this->family->inviteAdult($this->manager, fake()->email(), fake()->name(), $this->relation);
   }
 
   /** @test */
@@ -68,6 +69,9 @@ class ViewInvitationTest extends TestCase
           $json->where('name', $this->invitation->name)
             ->where('family_name', $this->family->name)
             ->where('id', $this->invitation->id)
+            ->where('status', config('invitations.status.unaccepted'))
+            ->where('relation', $this->relation)
+            ->etc()
         )
     );
   }
@@ -90,7 +94,7 @@ class ViewInvitationTest extends TestCase
   private function addInvitationsToFamily(Family $family, $count)
   {
     for ($i = 0; $i < $count; $i++) {
-      $family->inviteAdult($this->manager, fake()->unique()->email(), fake()->name());
+      $family->inviteAdult($this->manager, fake()->unique()->email(), fake()->name(), $this->relation);
     }
   }
 }

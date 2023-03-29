@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('invitations', function (Blueprint $table) {
+        $status = config('invitations.status.unaccepted');
+
+        Schema::create('invitations', function (Blueprint $table) use ($status) {
             $table->id();
             $table->string('name');
             $table->string('email');
+            $table->string('relation');
+            $table->string('status')->default($status);
             $table->date('expiration');
             $table->unsignedInteger('family_id');
             $table->timestamps();

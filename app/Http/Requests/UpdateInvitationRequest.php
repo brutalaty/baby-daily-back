@@ -3,16 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateInvitationRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return false;
-    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -22,7 +16,14 @@ class UpdateInvitationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'status' => [
+                'required',
+                Rule::in([
+                    config('invitations.status.accepted'),
+                    config('invitations.status.canceled'),
+                    config('invitations.status.declined'),
+                ])
+            ]
         ];
     }
 }

@@ -14,6 +14,8 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 use Tests\TestCase;
 
+use \DateTime;
+
 class CreateInvitationTest extends TestCase
 {
   use DatabaseMigrations;
@@ -28,10 +30,44 @@ class CreateInvitationTest extends TestCase
   }
 
   /** @test */
+  public function an_invitation_requires_relation()
+  {
+    $this->actingAs($this->user);
+    $family = $this->user->createFamily(fake()->lastName(), 'Mother');
+
+    $response = $this->postJson(route('families.invitations.store', $family));
+
+    $response->assertJsonValidationErrorFor('relation');
+  }
+
+  /** @test */
+  public function an_invitation_requires_an_email()
+  {
+    $this->actingAs($this->user);
+    $family = $this->user->createFamily(fake()->lastName(), 'Mother');
+
+    $response = $this->postJson(route('families.invitations.store', $family));
+
+    $response->assertJsonValidationErrorFor('email');
+  }
+
+  /** @test */
+  public function an_invitation_requires_a_name()
+  {
+    $this->actingAs($this->user);
+    $family = $this->user->createFamily(fake()->lastName(), 'Mother');
+
+    $response = $this->postJson(route('families.invitations.store', $family));
+
+    $response->assertJsonValidationErrorFor('name');
+  }
+
+  /** @test */
   public function a_guest_cannot_invite_to_a_family()
   {
     $family = Family::factory()->create();
-    $response = $this->postJson(route('families.invitations.store', $family), ['name' => 'test', 'email' => fake()->email()]);
+
+    $response = $this->postJson(route('families.invitations.store', $family));
 
     $response->assertUnauthorized();
   }
@@ -47,7 +83,11 @@ class CreateInvitationTest extends TestCase
 
     $this->actingAs($this->createUser());
 
-    $response = $this->postJson(route('families.invitations.store', $family), ['name' => 'test', 'email' => fake()->email()]);
+    $response = $this->postJson(route('families.invitations.store', $family), [
+      'name' => 'test',
+      'relation' => 'Uncle',
+      'email' => fake()->email()
+    ]);
 
     $response->assertForbidden();
   }
@@ -63,6 +103,7 @@ class CreateInvitationTest extends TestCase
 
     $response = $this->postJson(route('families.invitations.store', $family), [
       'name' => 'test',
+      'relation' => 'Uncle',
       'email' => fake()->email()
     ]);
 
@@ -70,24 +111,36 @@ class CreateInvitationTest extends TestCase
   }
 
   /** @test */
-  public function a_manager_of_a_family_cannot_invite_to_a_family_they_are_not_a_manager_of()
+  public function a_manager_of_a_family_cannot_invite_to_another_family_that_they_are_not_a_member_of()
   {
+    $this->actingAs($this->user);
+    $this->user->createFamily(fake()->lastName(), 'father');
+
     $otherUser = $this->createUser();
     $otherFamily = $otherUser->createFamily(fake()->lastName(), 'father');
 
-    $this->user->createFamily(fake()->lastName(), 'father');
-    $this->actingAs($this->user);
-
-    $response = $this->postJson(route('families.invitations.store', $otherFamily), [
+    $this->postJson(route('families.invitations.store', $otherFamily), [
       'name' => fake()->name(),
+      'relation' => 'Uncle',
       'email' => fake()->email()
-    ]);
-    $response->assertForbidden();
+    ])
+      ->assertForbidden();
+  }
+
+  /** @test */
+  public function a_manager_of_a_family_cannot_invite_to_another_family_that_they_are_not_a_managing_member()
+  {
+    $this->actingAs($this->user);
+    $this->user->createFamily(fake()->lastName(), 'father');
+
+    $otherManager = $this->createUser();
+    $otherFamily = $otherManager->createFamily(fake()->lastName(), 'father');
 
     $otherFamily->addAdult($this->user, 'Mother');
 
     $response = $this->postJson(route('families.invitations.store', $otherFamily), [
       'name' => fake()->name(),
+      'relation' => 'Uncle',
       'email' => fake()->email()
     ]);
     $response->assertForbidden();
@@ -106,6 +159,7 @@ class CreateInvitationTest extends TestCase
       route('families.invitations.store', $family),
       [
         'name' => $existingMember->name,
+        'relation' => 'Uncle',
         'email' => $existingMember->email
       ]
     );
@@ -119,40 +173,116 @@ class CreateInvitationTest extends TestCase
     $family = $this->user->createFamily(fake()->lastName(), 'father');
     $name = fake()->name();
     $email = fake()->email();
+    $relation = 'Uncle';
     $this->actingAs($this->user);
-    // fwrite(STDERR, print_r(fake()->email(), TRUE));
 
     $response = $this->postJson(route('families.invitations.store', $family), [
       'name' => $name,
+      'relation' => $relation,
       'email' => $email
     ]);
 
     $response->assertSuccessful();
 
     $response->assertJsonPath('data.name', $name);
+    $response->assertJsonPath('data.relation', $relation);
     $response->assertJsonPath('data.family_name', $family->name);
   }
 
   /** @test */
-  public function when_attempting_to_create_an_existing_invitation_it_does_not_create_a_duplicate()
+  public function a_new_invitation_has_the_status_of_unaccepted()
   {
-    //when same family && email address is used, update rather then create
-    $this->actingAs($this->user);
+    $this->withoutExceptionHandling();
     $family = $this->user->createFamily(fake()->lastName(), 'father');
+    $this->actingAs($this->user);
+
+    $response = $this->postJson(route('families.invitations.store', $family), [
+      'name' => fake()->name(),
+      'relation' => 'uncle',
+      'email' => fake()->email()
+    ]);
+
+    $response->assertJsonPath('data.status', config('invitations.status.unaccepted'));
+  }
+
+  /** @test */
+  public function a_new_invitation_has_an_expiration_that_is_set_to_a_future_time()
+  {
+    $family = $this->user->createFamily(fake()->lastName(), 'father');
+    $this->actingAs($this->user);
+
+    $response = $this->postJson(route('families.invitations.store', $family), [
+      'name' => fake()->name(),
+      'relation' => 'uncle',
+      'email' => fake()->email()
+    ]);
+
+    $response->assertJsonPath('data.expiration', function (string $expiration) {
+      $date = new DateTime($expiration);
+      return $date > now();
+    });
+  }
+
+  /** @test 
+   * live invitation: an unexpired and status:unaccepted invitation.
+   */
+  public function when_creating_an_invite_it_will_cancel_any_live_invitations_to_that_email()
+  {
+    $this->actingAs($this->user);
+    $family = $this->user->createFamily(fake()->lastName(), 'Father');
+    $invitation = $family->inviteAdult($this->user, fake()->email(), fake()->name(), 'Uncle');
+
+    $this->assertEquals(config('invitations.status.unaccepted'), $invitation->status);
+
+    $response = $this->postJson(
+      route('families.invitations.store', $family),
+      ['name' => fake()->name(), 'relation' => 'uncle', 'email' => $invitation->email]
+    );
+
+    $response->assertSuccessful();
+
+    $this->assertEquals(config('invitations.status.canceled'), $invitation->refresh()->status);
+  }
+
+  /** @test 
+   * live invitation: an unexpired and status:unaccepted invitation.
+   */
+  public function when_creating_an_invite_it_wont_cancel_inactive_invitations_to_that_email()
+  {
+    $this->actingAs($this->user);
+    $family = $this->user->createFamily(fake()->lastName(), 'Father');
     $email = fake()->email();
-    $data1 = ['name' => 'bob', 'email' => $email];
-    $data2 = ['name' => 'brad', 'email' => $email];
+    $name = fake()->name();
+    $relation = 'Uncle';
 
-    $response = $this->postJson(route('families.invitations.store', $family), $data1);
+    $invitationExpired = $this->createInvitationExpired($family, $this->user, $email, $name, $relation);
+    $invitationDeclined = $this->createInvitationWithStatus($family, $this->user, $email, $name, $relation, config('invitations.status.declined'));
+    $invitationAccepted = $this->createInvitationWithStatus($family, $this->user, $email, $name, $relation, config('invitations.status.accepted'));
 
-    $response->assertSuccessful();
+    $this->postJson(
+      route('families.invitations.store', $family),
+      ['name' => $name, 'relation' => $relation, 'email' => $email]
+    )->assertSuccessful();
 
-    $response = $this->postJson(route('families.invitations.store', $family), $data2);
-    $response->assertSuccessful();
-    $response->assertJsonPath('data.family_name', $family->name);
-    $response->assertJsonPath('data.name', $data2['name']);
-    $this->assertDatabaseCount('invitations', 1);
-    $this->assertDatabaseMissing('invitations', ['name' => $data1['name']]);
+    $this->assertEquals(config('invitations.status.unaccepted'), $invitationExpired->status);
+    $this->assertEquals(config('invitations.status.declined'), $invitationDeclined->status);
+    $this->assertEquals(config('invitations.status.accepted'), $invitationAccepted->status);
+  }
+
+  private function createInvitationWithStatus(Family $family, User $user, String $email, String $name, String $relation, $status): Invitation
+  {
+    $invitation = $family->inviteAdult($user, $email, $name, $relation);
+    $invitation->status = $status;
+    $invitation->save();
+    return $invitation;
+  }
+
+  private function createInvitationExpired(Family $family, User $user, String $email, String $name, String $relation): Invitation
+  {
+    $invitation = $family->inviteAdult($user, $email, $name, $relation);
+    $invitation->expiration = now()->subMonth();
+    $invitation->save();
+    return $invitation;
   }
 
 
@@ -166,6 +296,7 @@ class CreateInvitationTest extends TestCase
     $invitation = new Invitation();
     $invitation->email = $emailAddress;
     $invitation->name = $name;
+    $invitation->relation = 'uncle';
     $invitation->family_id = $family->id;
     $invitation->expiration = now();
     $invitation->save();
@@ -187,26 +318,9 @@ class CreateInvitationTest extends TestCase
     $email = fake()->email();
     $name = fake()->name();
 
-    $response = $this->postJson(route('families.invitations.store', $family), ['email' => $email, 'name' => $name]);
+    $response = $this->postJson(route('families.invitations.store', $family), ['email' => $email, 'name' => $name, 'relation' => 'uncle']);
     $response->assertSuccessful();
 
     Mail::assertSent(FamilyInvitation::class);
-  }
-
-  /** @test */
-  public function when_an_existing_is_updated_it_sends_another_invitation_email()
-  {
-    $this->actingAs($this->user);
-    $family = $this->user->createFamily(fake()->lastName(), 'Father');
-    $email = fake()->email();
-    $name = fake()->name();
-
-    $response = $this->postJson(route('families.invitations.store', $family), ['email' => $email, 'name' => $name]);
-    $response2 = $this->postJson(route('families.invitations.store', $family), ['email' => $email, 'name' => $name]);
-
-    $response->assertSuccessful();
-    $response2->assertSuccessful();
-
-    Mail::assertSent(FamilyInvitation::class, 2);
   }
 }

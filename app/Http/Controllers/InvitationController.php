@@ -9,8 +9,7 @@ use App\Http\Resources\InvitationResource;
 use App\Http\Resources\FamilyResource;
 
 use App\Http\Requests\StoreInvitationRequest;
-use App\Http\Requests\AcceptInvitationRequest;
-use Illuminate\Http\Resources;
+use App\Http\Requests\UpdateInvitationRequest;
 use Illuminate\Contracts\Support\Responsable;
 
 class InvitationController extends Controller
@@ -33,36 +32,46 @@ class InvitationController extends Controller
 
         $validated = $request->validated();
 
+        $this->cancelExistingInvitation($family, $validated['email']);
+
         $invitation = $family->inviteAdult(
             auth()->user(),
             $validated['email'],
-            $validated['name']
+            $validated['name'],
+            $validated['relation']
         );
 
         return new InvitationResource($invitation);
     }
 
     /**
-     * Accept an invitation and place the user into the family that invited them
+     * If there is an invitation that has not expired, been canceled or been declined, cancel it
      */
-    public function accept(AcceptInvitationRequest $request, Invitation $invitation): Responsable
+    private function cancelExistingInvitation(Family $family, String $email)
     {
-        $this->authorize('accept', $invitation);
+        $invitation = Invitation::where('family_id', $family->id)->where('email', $email)->where('expiration', '>', now())->first();
 
-        $relation = $request->validated()['relation'];
+        if (!$invitation) return;
 
-        $invitation->family->addAdult(auth()->user(), $relation);
-        $family = $invitation->family;
-        $invitation->forceDelete();
-
-        return new FamilyResource($family);
+        $invitation->status = config('invitations.status.canceled');
+        $invitation->save();
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Accept an invitation and place the user into the family that invited them
      */
-    public function destroy(Invitation $invitation): Response
+    public function update(UpdateInvitationRequest $request, Invitation $invitation): Responsable
     {
-        //
+        $status = $request->validated()['status'];
+        $this->authorize('update', [$invitation, $status]);
+
+        $invitation->family->addAdult(auth()->user(), $invitation->relation);
+
+        $invitation->status = $status;
+        $invitation->save();
+
+        $family = $invitation->family;
+
+        return new FamilyResource($family);
     }
 }

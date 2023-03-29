@@ -33,16 +33,9 @@ class ViewFamilyTest extends TestCase
     /** @test */
     public function guests_cannot_a_get_families()
     {
-        $response = $this->getJson(route('families.index'));
-        $response->assertUnauthorized();
-    }
+        $this->getJson(route('families.index'))->assertUnauthorized();
 
-    /** @test */
-    public function guests_cannot_a_get_a_family()
-    {
-        $response = $this->getJson(route('families.show', $this->family));
-
-        $response->assertUnauthorized();
+        $this->getJson(route('families.show', $this->family))->assertUnauthorized();
     }
 
     /** @test */
@@ -52,10 +45,9 @@ class ViewFamilyTest extends TestCase
         $this->actingAs($lonelyAdult);
 
         Family::factory()->count(3)->create();
-        $response = $this->getJson(route('families.index'),)
-            ->assertSuccessful();
 
-        $response->assertJson(fn ($json) => $json->has('data', 0));
+        $this->getJson(route('families.index'))
+            ->assertJson(fn ($json) => $json->has('data', 0));
     }
 
     /** @test */
@@ -64,9 +56,8 @@ class ViewFamilyTest extends TestCase
         $this->actingAs($this->user);
         $families = Family::factory()->count(3)->create();
 
-        $response = $this->getJson(route('families.show', $families->first()));
-
-        $response->assertForbidden();
+        $this->getJson(route('families.show', $families->first()))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -78,10 +69,7 @@ class ViewFamilyTest extends TestCase
         $family = $families->last();
         $family->addAdult($this->user, 'Father');
 
-        $response = $this->getJson(route('families.index'));
-
-
-        $response->assertJson(
+        $this->getJson(route('families.index'))->assertJson(
             fn (AssertableJson $json) =>
             $json->has('data', 2)
                 ->has(
@@ -101,9 +89,7 @@ class ViewFamilyTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        $response = $this->getJson(route('families.show', $this->family));
-
-        $response->assertJsonPath(
+        $this->getJson(route('families.show', $this->family))->assertJsonPath(
             'data.name',
             $this->family->name
         );
@@ -117,7 +103,7 @@ class ViewFamilyTest extends TestCase
         $this->actingAs($user);
         $family = $user->createFamily(fake()->lastName(), 'father');
 
-        $invitation = $family->inviteAdult($user, fake()->email(), fake()->name());
+        $invitation = $family->inviteAdult($user, fake()->email(), fake()->name(), 'Uncle');
 
         $this->getJson(route('families.show', $family))->assertJsonPath('data.invitations.0.name', $invitation->name);
 

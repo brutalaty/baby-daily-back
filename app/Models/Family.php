@@ -36,31 +36,32 @@ class Family extends Model
 
     public function getManager()
     {
-        return $this->adults()->where('manager', 1)->first(); //->where('manager', 1)->first();
+        return $this->adults()->where('manager', 1)->first();
     }
 
-    public function inviteAdult(User $sender, $email, $name): Invitation
+    public function inviteAdult(User $sender, $email, $name, $relation): Invitation
     {
-        throw_if(
-            (!$this->adults->contains($sender) ||
-                !$this->adults->find($sender)->member->manager == 1
-            ),
-            AuthorizationException::class,
-            'This user is not authorized send and invitation to this family.'
-        );
-
         $expiration = now()
-            ->addMonths(config('invitations.expliration.months'))
+            ->addMonths(config('invitations.expiration.months'))
             ->addDays(config('invitations.expiration.days'));
 
-        $invitation = $this->invitations()->firstOrNew(['email' => $email]);
+        $invitation = new Invitation();
+        $invitation->email = $email;
         $invitation->name = $name;
+        $invitation->relation = $relation;
         $invitation->expiration = $expiration;
-        $invitation->save();
+        $this->invitations()->save($invitation);
+
+        $invitation->refresh(); //reloading for DB defaults
 
         InvitationCreated::dispatch($sender, $invitation);
 
         return $invitation;
+    }
+
+    public function isManager(User $user): bool
+    {
+        return $this->adults->contains($user) && $this->adults->find($user)->member->manager == 1;
     }
 
     public function addAdult(User $user, String $relation)

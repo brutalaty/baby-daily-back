@@ -103,7 +103,7 @@ class UnitFamilyTest extends TestCase
         $user = $this->createUser();
         $family = $user->createFamily(fake()->lastName(), 'Father');
 
-        $family->inviteAdult($user, 'someone@something.com', fake()->name());
+        $family->inviteAdult($user, 'someone@something.com', fake()->name(), 'Uncle');
 
         $invitation = $family->invitations()->first();
 

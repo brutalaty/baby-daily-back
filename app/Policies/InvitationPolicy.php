@@ -32,22 +32,29 @@ class InvitationPolicy
      */
     public function create(User $user, Family $family): bool
     {
-        return $family->getManager()->id == $user->id;
-    }
-
-    /**
-     * Determine whether the user can accept an invitation to the family
-     */
-    public function accept(User $user, Invitation $invitation): bool
-    {
-        return $user->email == $invitation->email;
+        return $family->isManager($user);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Invitation $invitation): bool
+    public function update(User $user, Invitation $invitation, String $status): bool
     {
+        if ($invitation->expiration < now()) return false;
+        if ($invitation->status != config('invitations.status.unaccepted')) return false;
+
+        if ($status == config('invitations.status.accepted')) {
+            return $user->email == $invitation->email;
+        }
+
+        if ($status == config('invitations.status.declined')) {
+            return $user->email == $invitation->email;
+        }
+
+        if ($status == config('invitations.status.canceled')) {
+            return $invitation->family->isManager($user);
+        }
+
         return false;
     }
 

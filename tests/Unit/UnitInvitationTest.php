@@ -22,7 +22,6 @@ class UnitInvitationTest extends TestCase
     parent::setUp();
 
     $this->user = $this->createUser();
-    // $family->invitations
   }
 
   /** @test */
@@ -30,5 +29,14 @@ class UnitInvitationTest extends TestCase
   {
     $invitation = Invitation::factory()->create();
     $this->assertInstanceOf(Family::class, $invitation->family);
+  }
+
+  /** @test */
+  public function an_invitation_has_a_status_default_of_unaccepted()
+  {
+    $invitation = Invitation::factory()->create()->refresh();
+
+    $this->assertDatabaseHas('invitations', ['status' => config('invitations.status.unaccepted')]);
+    $this->assertEquals(config('invitations.status.unaccepted'), $invitation->status);
   }
 }

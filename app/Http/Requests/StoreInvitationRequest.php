@@ -19,9 +19,11 @@ class StoreInvitationRequest extends FormRequest
     public function rules(): array
     {
         $family = $this->route('family');
+        $user = auth()->user();
 
         return [
             'name' => ['string', 'max:255', 'required'],
+            'relation' => ['string', 'max:255', 'required'],
             'email' => [
                 'string',
                 'email',

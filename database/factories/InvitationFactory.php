@@ -22,6 +22,7 @@ class InvitationFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'family_id' => Family::factory(),
+            'relation' => 'Mother',
             'expiration' => now()
                 ->addMonths(config('invitations.expiration.months'))
                 ->addDays(config('invitations.expiration.days'))
