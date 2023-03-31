@@ -32,7 +32,7 @@ class InvitationController extends Controller
 
         $validated = $request->validated();
 
-        $this->cancelExistingInvitation($family, $validated['email']);
+        $family->cancelInvitationTo($validated['email']);
 
         $invitation = $family->inviteAdult(
             auth()->user(),
@@ -45,61 +45,28 @@ class InvitationController extends Controller
     }
 
     /**
-     * If there is an invitation that has not expired, been canceled or been declined, cancel it
-     */
-    private function cancelExistingInvitation(Family $family, String $email)
-    {
-        $invitation = Invitation::where('family_id', $family->id)->where('email', $email)->where('expiration', '>', now())->first();
-
-        if (!$invitation) return;
-
-        $invitation->status = config('invitations.status.canceled');
-        $invitation->save();
-    }
-
-    /**
-     * Accept an invitation and place the user into the family that invited them
+     * Consume the invitation, changing status to  accepted, declined or canceled
      */
     public function update(UpdateInvitationRequest $request, Invitation $invitation): mixed
     {
         $status = $request->validated()['status'];
         $this->authorize('update', [$invitation, $status]);
 
+        return $this->consumeInvitation($invitation, $status);
+    }
+
+
+    private function consumeInvitation(Invitation $invitation, String $status)
+    {
         if ($status == config('invitations.status.accepted')) {
-            return $this->accept($invitation);
+            $invitation->accept(auth()->user());
+            return new FamilyResource($invitation->family->fresh());
+        } else if ($status == config('invitations.status.declined')) {
+            $invitation->decline();
+        } else {
+            $invitation->cancel();
         }
-        if ($status == config('invitations.status.declined')) {
-            return $this->decline($invitation);
-        }
-        if ($status == config('invitations.status.canceled')) {
-            return $this->cancel($invitation);
-        }
-    }
 
-    private function accept($invitation)
-    {
-        $invitation->family->addAdult(auth()->user(), $invitation->relation);
-
-        $invitation->status = config('invitations.status.accepted');
-        $invitation->save();
-
-        $family = $invitation->family;
-        return new FamilyResource($family);
-    }
-
-    private function decline($invitation)
-    {
-        $invitation->status = config('invitations.status.declined');
-        $invitation->save();
-
-        return response()->noContent();
-    }
-
-    private function cancel($invitation)
-    {
-        $invitation->status = config('invitations.status.canceled');
-        $invitation->save();
-
-        return response()->noContent();
+        return Response()->noContent();
     }
 }

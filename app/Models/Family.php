@@ -79,4 +79,14 @@ class Family extends Model
 
         return $child;
     }
+
+    /**
+     * Cancel an unaccepted and unexpired invitations to provided email if it exists
+     */
+    public function cancelInvitationTo(String $email)
+    {
+        $invitation = $this->invitations()->where('email', $email)->where('expiration', '>', now())->first();
+
+        if ($invitation) $invitation->cancel($invitation);
+    }
 }
