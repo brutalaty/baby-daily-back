@@ -20,4 +20,9 @@ class Child extends Model
     {
         return $this->hasMany(Poop::class);
     }
+
+    public function avatarUrl(): String
+    {
+        return asset('storage/' . $this->avatar);
+    }
 }

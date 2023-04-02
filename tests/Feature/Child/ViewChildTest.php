@@ -7,8 +7,6 @@ use App\Models\Family;
 use App\Models\Child;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Support\Facades\Route;
 
 use Tests\TestCase;

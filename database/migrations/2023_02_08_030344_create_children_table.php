@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->date('born');
             $table->foreignId('family_id');
-            $table->text('image')->nullable();
+            $table->text('avatar')->nullable();
             $table->timestamps();
         });
     }
