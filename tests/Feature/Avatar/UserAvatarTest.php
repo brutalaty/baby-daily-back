@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Invitation;
 use App\Models\User;
 use App\Models\Family;
 
@@ -34,5 +33,14 @@ class UserAvatarTest extends TestCase
 
     $response = $this->getJson('/user');
     $response->assertJsonPath('data.avatar', fn ($avatar) => str_starts_with($avatar, 'http'));
+  }
+
+  /** @test */
+  public function when_getting_a_family_the_adults_have_avatars()
+  {
+    $this->actingAs($this->manager);
+
+    $response = $this->getJson(route('families.index'));
+    $response->assertJsonPath('data.0.adults.0.avatar', fn ($avatar) => str_starts_with($avatar, 'http'));
   }
 }
