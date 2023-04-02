@@ -23,8 +23,27 @@ use App\Models\Invitation;
 */
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
+    return new App\Http\Resources\UserResource($request->user()); //return resource with avatar
 });
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    //family
+    Route::apiResource('families', FamilyController::class)->only(['index', 'show', 'store']);
+    //children
+    Route::apiResource('families.children', ChildController::class)
+        ->only(['store', 'show', 'update'])
+        ->shallow();
+
+    //invitations
+    Route::post('/families/{family}/invitations', [InvitationController::class, 'store'])->name('families.invitations.store');
+    Route::apiResource('invitations', InvitationController::class)
+        ->only(['index', 'update']);
+});
+
+
+
+
+
 
 Route::middleware(['auth:sanctum'])->get('/poops', function (Request $request) {
     $format = "Y-m-d-H-i";
@@ -43,18 +62,3 @@ Route::middleware(['auth:sanctum'])->get('/poops', function (Request $request) {
         ]
     ]);
 })->name('poops.get');
-
-
-Route::middleware(['auth:sanctum'])->group(function () {
-    //family
-    Route::apiResource('families', FamilyController::class)->only(['index', 'show', 'store']);
-    //children
-    Route::apiResource('families.children', ChildController::class)
-        ->only(['store', 'show', 'update'])
-        ->shallow();
-
-    //invitations
-    Route::post('/families/{family}/invitations', [InvitationController::class, 'store'])->name('families.invitations.store');
-    Route::apiResource('invitations', InvitationController::class)
-        ->only(['index', 'update']);
-});

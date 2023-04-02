@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use Illuminate\Support\Facades\Storage;
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -59,5 +61,10 @@ class User extends Authenticatable
         );
 
         return $family;
+    }
+
+    public function avatarUrl(): String
+    {
+        return asset('storage/' . $this->avatar);
     }
 }

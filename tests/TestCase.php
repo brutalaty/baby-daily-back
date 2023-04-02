@@ -12,6 +12,17 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
+
+    public function tearDown(): void
+    {
+        //remove avatars
+        foreach (User::all() as $user) {
+            $user->delete();
+        }
+
+        parent::tearDown();
+    }
+
     protected function createUser($attributes = []): User
     {
         return User::factory()->create($attributes);

@@ -18,7 +18,8 @@ class AdultResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'relation' => $this->member->relation,
-            'manager' => $this->member->manager == 1 ? true : false
+            'manager' => $this->member->manager == 1 ? true : false,
+            'avatar' => $this->avatarUrl()
         ];
     }
 }
