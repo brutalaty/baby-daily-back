@@ -21,9 +21,9 @@ class ChildObserver
         $base = config('avatars.path.children.base');
         $location = config('avatars.path.children.db');
 
-        Avatar::create($child->name)->save($base . $location . $filename);
+        Avatar::create($child->name)->setTheme('pastel')->save($base . $location . $filename);
 
-        $child->avatar = $location . $filename;
+        $child->avatar = $filename;
         $child->save();
     }
 
@@ -40,9 +40,8 @@ class ChildObserver
      */
     public function deleted(Child $child): void
     {
-        $base = config('avatars.path.children.base');
-        if (Storage::exists($base . $child->avatar)) {
-            Storage::delete($base . $child->avatar);
+        if (Storage::disk('children')->exists($child->avatar)) {
+            Storage::disk('children')->delete($child->avatar);
         }
     }
 

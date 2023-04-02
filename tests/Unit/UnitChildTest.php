@@ -6,10 +6,10 @@ use Tests\TestCase;
 
 use App\Models\Child;
 use App\Models\Family;
-use App\Models\Poop;
+
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UnitChildTest extends TestCase
 {
@@ -35,22 +35,20 @@ class UnitChildTest extends TestCase
     /** @test */
     public function children_have_an_avatar()
     {
-        $expected = config('avatars.path.children.db')
-            . $this->child->id
-            . config('avatars.file.type');
+        $expected = $this->child->id . config('avatars.file.type');
 
         $this->assertNotNull($this->child->avatar);
         $this->assertEquals($expected, $this->child->avatar);
-        $this->assertFileExists(config('avatars.path.children.testprefix') . $this->child->avatar);
+        Storage::disk('children')->assertExists($this->child->avatar);
     }
 
     /** @test */
     public function when_a_child_is_deleted_their_avatar_is_deleted()
     {
         $location = config('avatars.path.children.testprefix') . $this->child->avatar;
-        $this->assertFileExists($location);
+        Storage::disk('children')->assertExists($this->child->avatar);
         $this->child->delete();
-        $this->assertFileExists($location);
+        Storage::disk('children')->assertMissing($this->child->avatar);
     }
 
     /** @test */

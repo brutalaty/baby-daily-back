@@ -8,10 +8,25 @@ use App\Models\User;
 
 use App\Http\Requests\StoreChildRequest;
 use App\Http\Requests\UpdateChildRequest;
+use App\Http\Requests\UpdateChildAvatarRequest;
+
 use App\Http\Resources\ChildResource;
 
 class ChildController extends Controller
 {
+
+    public function avatar(UpdateChildAvatarRequest $request, User $user, Child $child)
+    {
+        $this->authorize('avatar', $child);
+
+        $path = request()->file('avatar')->storeAs(
+            '',
+            $child->id,
+            'children'
+        );
+
+        $child->updateAvatar($path);
+    }
 
     /**
      * Display a listing of the resource.

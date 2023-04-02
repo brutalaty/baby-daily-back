@@ -29,7 +29,10 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::middleware(['auth:sanctum'])->group(function () {
     //family
     Route::apiResource('families', FamilyController::class)->only(['index', 'show', 'store']);
+
+
     //children
+    Route::patch('children/{child}/avatar', [ChildController::class, 'avatar'])->name('children.avatar');
     Route::apiResource('families.children', ChildController::class)
         ->only(['store', 'show', 'update'])
         ->shallow();

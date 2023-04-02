@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Family;
 
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 

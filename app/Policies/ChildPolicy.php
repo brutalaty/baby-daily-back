@@ -14,6 +14,14 @@ class ChildPolicy
     use HandlesAuthorization;
 
     /**
+     * Determine whether the user can update this childs avatar
+     */
+    public function avatar(User $user, Child $child)
+    {
+        return $child->family->getManager()->id == $user->id;
+    }
+
+    /**
      * Determine whether the user can view any models.
      *
      * @param  \App\Models\User  $user
