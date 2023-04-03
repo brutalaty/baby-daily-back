@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use Illuminate\Support\Facades\Storage;
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -61,8 +63,17 @@ class User extends Authenticatable
         return $family;
     }
 
+    public function updateAvatar(String $filename)
+    {
+        if ($this->avatar != $filename) {
+            Storage::disk('users')->delete($this->avatar);
+            $this->avatar = $filename;
+            $this->save();
+        }
+    }
+
     public function avatarUrl(): String
     {
-        return asset('storage/' . $this->avatar);
+        return Storage::disk('users')->url($this->avatar);
     }
 }

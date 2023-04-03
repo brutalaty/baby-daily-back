@@ -91,8 +91,6 @@ class UnitFamilyTest extends TestCase
         $user = $this->createUser();
         $family = $user->createFamily('Test Family', 'Test Father');
 
-        // fwrite(STDERR, print_r($log, TRUE));
-
         $this->assertInstanceOf(User::class, $family->getManager());
         $this->assertEquals($family->getManager()->id, $user->id);
     }

@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Family;
 use App\Models\Child;
 
+use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class UnitUserTest extends TestCase
@@ -25,9 +27,6 @@ class UnitUserTest extends TestCase
         parent::setUp();
 
         $this->user = $this->createUser();
-        $this->usersChild = Child::factory()->create(['name' => 'users child']);
-        $this->notUsersChild = Child::factory()->create(['name' => 'not users child']);
-        $this->usersFamily = Family::factory()->create(['name' => 'users family']);
     }
 
     /** @test */
@@ -45,22 +44,19 @@ class UnitUserTest extends TestCase
     /** @test */
     public function users_have_an_avatar()
     {
-        $expected = config('avatars.path.users.db')
-            . $this->user->id
-            . config('avatars.file.type');
+        $expected = $this->user->id . config('avatars.file.type');
 
         $this->assertNotNull($this->user->avatar);
         $this->assertEquals($expected, $this->user->avatar);
-        $this->assertFileExists(config('avatars.path.users.testprefix') . $this->user->avatar);
+        Storage::disk('users')->assertExists($this->user->avatar);
     }
 
     /** @test */
     public function when_a_user_is_force_deleted_their_avatar_is_deleted()
     {
-        $location = config('avatars.path.users.testprefix') . $this->user->avatar;
-        $this->assertFileExists($location);
+        Storage::disk('users')->assertExists($this->user->avatar);
         $this->user->delete();
-        $this->assertFileExists($location);
+        Storage::disk('users')->assertMissing($this->user->avatar);
     }
 
     /** @test */

@@ -23,7 +23,7 @@ class UserObserver
 
         Avatar::create($user->name)->save($base . $location . $filename);
 
-        $user->avatar = $location . $filename;
+        $user->avatar = $filename;
         $user->save();
     }
 
@@ -40,9 +40,8 @@ class UserObserver
      */
     public function deleted(User $user): void
     {
-        $base = config('avatars.path.users.base');
-        if (Storage::exists($base . $user->avatar)) {
-            Storage::delete($base . $user->avatar);
+        if (Storage::disk('users')->exists($user->avatar)) {
+            Storage::disk('users')->delete($user->avatar);
         }
     }
 

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\InvitationController;
@@ -22,11 +23,12 @@ use App\Models\Invitation;
 |
 */
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return new App\Http\Resources\UserResource($request->user()); //return resource with avatar
-});
-
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/user', function (Request $request) {
+        return new App\Http\Resources\UserResource($request->user());
+    });
+    Route::patch('/user/avatar', [UserController::class, 'avatar'])->name('user.avatar');
+
     //family
     Route::apiResource('families', FamilyController::class)->only(['index', 'show', 'store']);
 
