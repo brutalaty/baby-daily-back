@@ -52,10 +52,12 @@ class ChildAvatarTest extends TestCase
   /** @test */
   public function the_manager_of_the_family_can_change_its_childrens_avatars()
   {
+    Storage::fake('children');
     $this->actingAs($this->manager);
 
     $child = $this->family->addNewChild(fake()->name(), now()->subYear());
     $child->refresh();
+
 
     Storage::disk('children')->delete($child->avatar);
     Storage::disk('children')->assertMissing($child->fresh()->avatar);
@@ -66,7 +68,6 @@ class ChildAvatarTest extends TestCase
       route('children.avatar', $child),
       ['avatar' => $file]
     )->assertSuccessful();
-
     Storage::disk('children')->assertExists($child->fresh()->avatar);
   }
 
@@ -122,7 +123,7 @@ class ChildAvatarTest extends TestCase
     $child->refresh();
 
     $oldFile = $child->avatar;
-    $file = UploadedFile::fake()->image('avatar.png');
+    $file = UploadedFile::fake()->image('avatar.jpg');
 
     $this->patchJson(
       route('children.avatar', $child),

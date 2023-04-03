@@ -23,19 +23,17 @@ class Child extends Model
         return $this->hasMany(Poop::class);
     }
 
-    public function updateAvatar(String $avatar)
+    public function updateAvatar(String $filename)
     {
-        if ($this->avatar != $avatar) {
+        if ($this->avatar != $filename) {
             Storage::disk('children')->delete($this->avatar);
+            $this->avatar = $filename;
+            $this->save();
         }
-
-        $this->avatar = $avatar;
-        $this->save();
     }
 
     public function avatarUrl(): String
     {
-        // return asset('storage/' . $this->avatar);
         return Storage::disk('children')->url($this->avatar);
     }
 }

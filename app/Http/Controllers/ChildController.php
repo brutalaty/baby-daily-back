@@ -8,20 +8,21 @@ use App\Models\User;
 
 use App\Http\Requests\StoreChildRequest;
 use App\Http\Requests\UpdateChildRequest;
-use App\Http\Requests\UpdateChildAvatarRequest;
+use App\Http\Requests\UpdateAvatarRequest;
 
 use App\Http\Resources\ChildResource;
 
 class ChildController extends Controller
 {
 
-    public function avatar(UpdateChildAvatarRequest $request, User $user, Child $child)
+    public function avatar(UpdateAvatarRequest $request, User $user, Child $child)
     {
         $this->authorize('avatar', $child);
+        $file = $request->file('avatar');
 
-        $path = request()->file('avatar')->storeAs(
-            '',
-            $child->id,
+        $path = $file->storeAs(
+            '/',
+            $child->id . '.' . $file->extension(),
             'children'
         );
 

@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 use \DateTime;
 
-class UpdateChildAvatarRequest extends FormRequest
+class UpdateAvatarRequest extends FormRequest
 {
 
   /**
