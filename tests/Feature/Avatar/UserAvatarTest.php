@@ -68,8 +68,6 @@ class UserAvatarTest extends TestCase
   {
     $this->actingAs($this->manager);
 
-    Storage::fake('users');
-
     $file = UploadedFile::fake()->image('avatar.png')->size(1000);
 
     $this->patchJson(route('user.avatar'), ['avatar' => $file])->assertUnprocessable();

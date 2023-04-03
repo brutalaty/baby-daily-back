@@ -52,7 +52,6 @@ class ChildAvatarTest extends TestCase
   /** @test */
   public function the_manager_of_the_family_can_change_its_childrens_avatars()
   {
-    Storage::fake('children');
     $this->actingAs($this->manager);
 
     $child = $this->family->addNewChild(fake()->name(), now()->subYear());
