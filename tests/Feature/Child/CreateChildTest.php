@@ -23,6 +23,24 @@ class CreateChildTest extends TestCase
   }
 
   /** @test */
+  public function a_families_manager_can_create_children()
+  {
+    $me = $this->createUser();
+    $myFamily = $me->createFamily(fake()->lastName(), 'Father');
+
+    $this->actingAs($me);
+
+    $response = $this->postJson(route('families.children.store', $myFamily), [
+      'name' => 'test child',
+      'born' => $this->dateInThePast,
+    ]);
+
+    $response->assertSuccessful();
+
+    $this->assertCount(1, $myFamily->fresh()->children);
+  }
+
+  /** @test */
   public function a_guest_cannot_create_a_child()
   {
     $family = Family::factory()->create();
@@ -50,18 +68,16 @@ class CreateChildTest extends TestCase
   }
 
   /** @test */
-  public function a_user_can_create_a_child_for_a_family_they_belong_to()
+  public function a_user_cannot_create_a_child_for_a_family_they_belong_to()
   {
     $myFamily = Family::factory()->create();
     $me = $this->createUser();
     $myFamily->addAdult($me, 'Father');
     $this->actingAs($me);
 
-    $response = $this->postJson(route('families.children.store', $myFamily), [
+    $this->postJson(route('families.children.store', $myFamily), [
       'name' => 'test child',
       'born' => $this->dateInThePast,
-    ]);
-
-    $response->assertCreated();
+    ])->assertForbidden();
   }
 }

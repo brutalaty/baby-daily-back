@@ -53,7 +53,7 @@ class ChildPolicy
      */
     public function create(User $user, Family $family)
     {
-        return $family->adults->contains($user);
+        return $family->isManager($user);
     }
 
     /**
@@ -65,7 +65,7 @@ class ChildPolicy
      */
     public function update(User $user, Child $child)
     {
-        return $child->family->adults->contains($user);
+        return $child->family->isManager($user);
     }
 
     /**
