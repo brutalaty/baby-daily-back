@@ -9,7 +9,6 @@ use App\Http\Requests\UpdatefamilyRequest;
 use App\Http\Resources\FamilyResource;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class FamilyController extends Controller
 {
@@ -17,6 +16,14 @@ class FamilyController extends Controller
     public function __construct()
     {
         $this->authorizeResource(Family::class, 'family');
+    }
+
+    public function transferManager(Request $request, Family $family, User $user)
+    {
+        $auth = auth()->user();
+        $this->authorize('transferManager', [$family, $user]);
+
+        $family->transferManager($auth, $user);
     }
 
     public function removeAdult(Request $request, Family $family, User $user)

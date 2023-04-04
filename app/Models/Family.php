@@ -39,6 +39,16 @@ class Family extends Model
         return $this->adults()->where('manager', 1)->first();
     }
 
+    public function transferManager(User $from, User $to)
+    {
+        $to->families()->updateExistingPivot($this->id, [
+            'manager' => 1,
+        ]);
+        $from->families()->updateExistingPivot($this->id, [
+            'manager' => 0,
+        ]);
+    }
+
     public function inviteAdult(User $sender, $email, $name, $relation): Invitation
     {
         $expiration = now()

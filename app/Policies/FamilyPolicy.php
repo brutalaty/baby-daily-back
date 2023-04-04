@@ -10,6 +10,13 @@ class FamilyPolicy
 {
     use HandlesAuthorization;
 
+
+    public function transferManager(User $auth, Family $family, User $user)
+    {
+        return $family->isManager($auth) && $family->adults->contains($user);
+    }
+
+
     /**
      * Determine whether this authenticated user can remove the user from the family
      * Managers can only remove other users
