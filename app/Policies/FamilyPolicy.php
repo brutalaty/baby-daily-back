@@ -10,10 +10,18 @@ class FamilyPolicy
 {
     use HandlesAuthorization;
 
-
+    /**
+     * Determine whether this authenticated user can remove the user from the family
+     * Managers can only remove other users
+     * Non Managers can only remove themselves
+     */
     public function removeAdult(User $auth, Family $family, User $user)
     {
-        return $family->getManager()->id == $auth->id && $auth->id != $user->id;
+        if (!$family->adults->contains($user)) return false;
+
+        if ($family->isManager($auth)) return $auth->id != $user->id;
+
+        return $auth->id == $user->id;
     }
 
     /**

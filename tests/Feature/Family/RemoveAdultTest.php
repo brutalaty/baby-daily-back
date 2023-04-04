@@ -67,4 +67,15 @@ class RemoveAdultTest extends TestCase
       ->assertForbidden();
     $this->assertTrue($this->family->fresh()->adults->contains($this->manager));
   }
+
+  /** @test */
+  public function a_non_managing_adult_can_remove_themselves_from_a_family()
+  {
+    $this->actingAs($this->adult);
+    $this->assertTrue($this->family->adults->contains($this->adult));
+
+    $this->deleteJson(route('families.users.delete', ['family' => $this->family, 'user' => $this->adult]))
+      ->assertSuccessful();
+    $this->assertFalse($this->family->fresh()->adults->contains($this->adult));
+  }
 }
