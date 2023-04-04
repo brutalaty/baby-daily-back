@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\family;
+use App\Models\Family;
+use App\Models\User;
 use App\Http\Requests\StorefamilyRequest;
 use App\Http\Requests\UpdatefamilyRequest;
 use App\Http\Resources\FamilyResource;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class FamilyController extends Controller
 {
@@ -13,6 +17,12 @@ class FamilyController extends Controller
     public function __construct()
     {
         $this->authorizeResource(Family::class, 'family');
+    }
+
+    public function removeAdult(Request $request, Family $family, User $user)
+    {
+        $this->authorize('removeAdult', [$family, $user]);
+        $family->removeAdult($user);
     }
 
     /**

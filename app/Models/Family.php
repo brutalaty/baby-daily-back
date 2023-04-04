@@ -69,6 +69,11 @@ class Family extends Model
         $this->adults()->attach($user, ['relation' => $relation]);
     }
 
+    public function removeAdult(User $user)
+    {
+        $this->adults()->detach($user);
+    }
+
     public function addNewChild(String $name, String $born)
     {
         $child = new Child();

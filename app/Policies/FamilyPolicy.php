@@ -10,6 +10,12 @@ class FamilyPolicy
 {
     use HandlesAuthorization;
 
+
+    public function removeAdult(User $auth, Family $family, User $user)
+    {
+        return $family->getManager()->id == $auth->id && $auth->id != $user->id;
+    }
+
     /**
      * Determine whether the user can view any models.
      *

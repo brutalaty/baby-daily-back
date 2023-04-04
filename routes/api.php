@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/user/avatar', [UserController::class, 'avatar'])->name('user.avatar');
 
     //family
+    Route::delete('families/{family}/users/{user}', [FamilyController::class, 'removeAdult'])->name('families.users.delete');
     Route::apiResource('families', FamilyController::class)->only(['index', 'show', 'store']);
 
 
