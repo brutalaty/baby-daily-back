@@ -77,7 +77,7 @@ class ChildPolicy
      */
     public function delete(User $user, Child $child)
     {
-        //
+        return $child->family->isManager($user);
     }
 
     /**
@@ -89,7 +89,6 @@ class ChildPolicy
      */
     public function restore(User $user, Child $child)
     {
-        //
     }
 
     /**

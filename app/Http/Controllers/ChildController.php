@@ -96,6 +96,7 @@ class ChildController extends Controller
      */
     public function destroy(child $child)
     {
-        //
+        $this->authorize('delete', $child);
+        $child->delete();
     }
 }

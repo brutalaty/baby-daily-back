@@ -38,7 +38,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //children
     Route::patch('children/{child}/avatar', [ChildController::class, 'avatar'])->name('children.avatar');
     Route::apiResource('families.children', ChildController::class)
-        ->only(['store', 'show', 'update'])
+        ->only(['store', 'show', 'update', 'destroy'])
         ->shallow();
 
     //invitations
