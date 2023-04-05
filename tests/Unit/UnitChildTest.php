@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 
+use App\Models\Activity;
 use App\Models\Child;
 use App\Models\Family;
 
@@ -56,5 +57,23 @@ class UnitChildTest extends TestCase
     {
         $this->assertStringContainsString('http', $this->child->avatarUrl());
         $this->assertStringContainsString($this->child->avatar, $this->child->avatarUrl());
+    }
+
+    /** @test */
+    public function a_child_can_have_many_activities()
+    {
+        $this->child->activities()->saveMany([
+            new Activity([
+                'time' => now()->subMinutes(30),
+                'type' => config('enums.activities.sleep')
+            ]),
+            new Activity([
+                'time' => now()->subMinutes(5),
+                'type' => config('enums.activities.wake')
+            ]),
+        ]);
+
+        $this->assertCount(2, $this->child->activities);
+        $this->assertInstanceOf(Activity::class, $this->child->activities->first());
     }
 }

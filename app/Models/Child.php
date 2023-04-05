@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Activity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,9 +20,9 @@ class Child extends Model
         return $this->belongsTo(Family::class);
     }
 
-    public function poops()
+    public function activities()
     {
-        return $this->hasMany(Poop::class);
+        return $this->hasMany(Activity::class);
     }
 
     public function updateAvatar(String $filename)

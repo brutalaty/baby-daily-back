@@ -7,10 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\InvitationController;
-
-use App\Models\Family;
-use App\Models\Child;
-use App\Models\Invitation;
+use App\Http\Controllers\ActivityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,27 +42,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/families/{family}/invitations', [InvitationController::class, 'store'])->name('families.invitations.store');
     Route::apiResource('invitations', InvitationController::class)
         ->only(['index', 'update']);
+
+    //childrens activities
+    Route::apiResource('children.activities', ActivityController::class)->only(['store']);
 });
-
-
-
-
-
-
-Route::middleware(['auth:sanctum'])->get('/poops', function (Request $request) {
-    $format = "Y-m-d-H-i";
-    return response()->json([
-        (object) [
-            'id' => 1,
-            'time' => date($format, strtotime("-1 hour")),
-        ],
-        (object) [
-            'id' => 2,
-            'time' => date($format, strtotime("-20 minutes")),
-        ],
-        (object) [
-            'id' => 3,
-            'time' => date($format, strtotime("+1 hour")),
-        ]
-    ]);
-})->name('poops.get');
