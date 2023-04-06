@@ -94,4 +94,20 @@ class StoreActivityTest extends TestCase
       ['time' => now(), 'type' => config('enums.activities.sleep')]
     )->assertForbidden();
   }
+
+  /** @test */
+  public function storing_an_activity_requires_a_type_that_is_stored_in_config_enums_activities()
+  {
+    $this->actingAs($this->adult);
+
+    $wrongType = 'robots';
+
+    $this->postJson(
+      route('children.activities.store', $this->child),
+      [
+        'time' => now(),
+        'type' => $wrongType
+      ]
+    )->assertUnprocessable();
+  }
 }
