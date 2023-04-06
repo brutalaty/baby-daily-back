@@ -18,4 +18,9 @@ class Activity extends Model
     {
         return $this->belongsTo(Child::class);
     }
+
+    public function consumptions()
+    {
+        return $this->hasMany(Consumption::class);
+    }
 }

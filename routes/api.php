@@ -8,6 +8,7 @@ use App\Http\Controllers\ChildController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ConsumptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,4 +46,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //childrens activities
     Route::apiResource('children.activities', ActivityController::class)->only(['store']);
+    //activity consumptions
+    Route::apiResource('activities.consumptions', ConsumptionController::class)->only(['store']);
 });
