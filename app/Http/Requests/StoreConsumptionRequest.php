@@ -14,7 +14,7 @@ class StoreConsumptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'volume' => 'integer|required|digits_between:0,100',
+            'volume' => 'integer|required|between:0,100',
             'name'  => 'string|required'
         ];
     }

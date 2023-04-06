@@ -128,4 +128,15 @@ class StoreConsumptionTest extends TestCase
       ['volume' => 50]
     )->assertUnprocessable();
   }
+
+  /** @test */
+  public function storing_a_consumption_requires_the_volume_to_be_between_0_and_100()
+  {
+    $this->actingAs($this->adult);
+
+    $this->postJson(
+      route('activities.consumptions.store', $this->activity),
+      ['name' => 'Cereal', 'volume' => 101]
+    )->assertUnprocessable();
+  }
 }
