@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Arr;
+use \App\Services\Activities\ActivitiesFacade;
 
-class StoreActivityRequest extends FormRequest
+use Illuminate\Validation\Rule;
+
+class StoreActivityRequest extends ActivityRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -15,14 +15,11 @@ class StoreActivityRequest extends FormRequest
      */
     public function rules(): array
     {
-
-        [$keys, $values] = Arr::divide(config('enums.activities'));
-
         return [
             'type' => [
                 'string',
                 'required',
-                Rule::in($values),
+                Rule::in(ActivitiesFacade::activities()),
             ],
             'time' => [
                 'date',

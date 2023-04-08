@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Family;
 use App\Models\Child;
 
+use \App\Services\Activities\ActivitiesFacade;
+
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 use Tests\TestCase;
@@ -102,12 +104,20 @@ class StoreActivityTest extends TestCase
 
     $wrongType = 'robots';
 
-    $this->postJson(
+    $response = $this->postJson(
       route('children.activities.store', $this->child),
       [
         'time' => now(),
         'type' => $wrongType
       ]
-    )->assertUnprocessable();
+    );
+
+    $response->assertUnprocessable();
+    $response->assertJsonPath('errors.type.0', function ($error) {
+      foreach (ActivitiesFacade::activities() as $activity) {
+        if (!str_contains($error, $activity)) return false;
+      }
+      return true;
+    });
   }
 }
