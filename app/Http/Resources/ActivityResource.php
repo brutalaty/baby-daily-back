@@ -20,6 +20,7 @@ class ActivityResource extends JsonResource
             'type' => $this->type,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'child_id' => $this->child_id
         ];
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Child;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Carbon;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class UpdateActivityTest extends TestCase
@@ -154,5 +155,27 @@ class UpdateActivityTest extends TestCase
         return $now->eq(new Carbon($string));
       }
     );
+  }
+
+  /** @test */
+  public function when_updating_an_activity_it_returns_the_activity_object()
+  {
+    $this->actingAs($this->manager);
+
+    $response = $this->patchJson(
+      route('activities.update', $this->activity),
+      ['time' => now()]
+    )->assertSuccessful();
+
+    $response->assertJson(fn (AssertableJson $json) =>
+    $json->has(
+      'data',
+      fn (AssertableJson $json) =>
+      $json->has('time')
+        ->where('type', $this->activity->type)
+        ->where('id', $this->activity->id)
+        ->where('child_id', $this->activity->child_id)
+        ->etc()
+    ));
   }
 }
