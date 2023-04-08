@@ -8,7 +8,7 @@ use App\Models\Child;
 use App\Models\Activity;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class StoreConsumptionTest extends TestCase
@@ -138,5 +138,27 @@ class StoreConsumptionTest extends TestCase
       route('activities.consumptions.store', $this->activity),
       ['name' => 'Cereal', 'volume' => 101]
     )->assertUnprocessable();
+  }
+
+  /** @test */
+  public function when_storing_a_consumption_it_returns_the_consumption_object()
+  {
+    $this->actingAs($this->adult);
+
+    $response = $this->postJson(
+      route('activities.consumptions.store', $this->activity),
+      ['volume' => 25, 'name' => 'Chicken']
+    )->assertSuccessful();
+
+    $response->assertJson(fn (AssertableJson $json) =>
+    $json->has(
+      'data',
+      fn (AssertableJson $json) =>
+      $json->has('id')
+        ->where('volume', 25)
+        ->where('name', 'Chicken')
+        ->where('activity_id', $this->activity->id)
+        ->etc()
+    ));
   }
 }

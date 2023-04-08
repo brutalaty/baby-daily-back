@@ -30,6 +30,8 @@ class ConsumptionController extends Controller
         $consumption = new Consumption(['name' => $request['name'], 'volume' => $request['volume']]);
 
         $activity->consumptions()->save($consumption);
+
+        return new ConsumptionResource($consumption);
     }
 
     /**
