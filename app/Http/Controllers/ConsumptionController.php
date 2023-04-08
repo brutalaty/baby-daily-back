@@ -8,6 +8,8 @@ use App\Models\Activity;
 use App\Http\Requests\StoreConsumptionRequest;
 use App\Http\Requests\UpdateConsumptionRequest;
 
+use App\Http\Resources\ConsumptionResource;
+
 class ConsumptionController extends Controller
 {
     /**
@@ -48,6 +50,8 @@ class ConsumptionController extends Controller
         $consumption->volume = $request['volume'];
         $consumption->name = $request['name'];
         $consumption->save();
+
+        return new ConsumptionResource($consumption);
     }
 
     /**

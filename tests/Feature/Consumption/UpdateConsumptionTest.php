@@ -10,7 +10,7 @@ use App\Models\Child;
 use App\Models\Activity;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class UpdateConsumptionTest extends TestCase
@@ -154,5 +154,28 @@ class UpdateConsumptionTest extends TestCase
     )
       ->assertUnprocessable()
       ->assertJsonValidationErrorFor('volume');
+  }
+
+  /** @test */
+  public function when_updating_a_consumption_it_returns_the_updated_consumption()
+  {
+    $this->actingAs($this->adult);
+
+    $response = $this->patchJson(
+      route('consumptions.update', $this->consumption),
+      ['volume' => 95, 'name' => 'Pie']
+    )
+      ->assertSuccessful();
+
+    $response->assertJson(fn (AssertableJson $json) =>
+    $json->has(
+      'data',
+      fn (AssertableJson $json) =>
+      $json->where('name', 'Pie')
+        ->where('volume', 95)
+        ->where('id', $this->consumption->id)
+        ->where('activity_id', $this->consumption->activity->id)
+        ->etc()
+    ));
   }
 }
