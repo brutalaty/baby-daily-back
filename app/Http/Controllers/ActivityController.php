@@ -35,6 +35,8 @@ class ActivityController extends Controller
             'time' => $request['time']
         ]);
         $child->activities()->save($activity);
+
+        return new ActivityResource($activity);
     }
 
     /**

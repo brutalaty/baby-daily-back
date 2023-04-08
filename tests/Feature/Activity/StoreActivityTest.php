@@ -9,6 +9,7 @@ use App\Models\Child;
 use \App\Services\Activities\ActivitiesFacade;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 use Tests\TestCase;
 
@@ -119,5 +120,27 @@ class StoreActivityTest extends TestCase
       }
       return true;
     });
+  }
+
+  /** @test */
+  public function when_storing_an_activity_it_returns_the_new_activity()
+  {
+    $this->actingAs($this->adult);
+
+    $response = $this->postJson(
+      route('children.activities.store', $this->child),
+      ['time' => now(), 'type' => config('enums.activities.sleep')]
+    )->assertSuccessful();
+
+    $response->assertJson(fn (AssertableJson $json) =>
+    $json->has(
+      'data',
+      fn (AssertableJson $json) =>
+      $json->has('time')
+        ->has('id')
+        ->where('type', config('enums.activities.sleep'))
+        ->where('child_id', $this->child->id)
+        ->etc()
+    ));
   }
 }
