@@ -39,7 +39,7 @@ class ActivityPolicy
      */
     public function update(User $user, Activity $activity): bool
     {
-        //
+        return $activity->child->family->adults->contains($user);
     }
 
     /**

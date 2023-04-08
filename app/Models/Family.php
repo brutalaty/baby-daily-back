@@ -7,8 +7,6 @@ use App\Events\InvitationCreated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Auth\Access\AuthorizationException;
-
 class Family extends Model
 {
     use HasFactory;

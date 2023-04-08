@@ -8,6 +8,8 @@ use App\Models\Child;
 
 use App\Http\Requests\StoreActivityRequest;
 use App\Http\Requests\UpdateActivityRequest;
+use App\Http\Resources\ActivityResource;
+
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 
@@ -49,7 +51,12 @@ class ActivityController extends Controller
      */
     public function update(UpdateActivityRequest $request, Activity $activity)
     {
-        //
+        $this->authorize('update', $activity);
+
+        $activity->time = $request['time'];
+        $activity->save();
+
+        return new ActivityResource($activity);
     }
 
     /**

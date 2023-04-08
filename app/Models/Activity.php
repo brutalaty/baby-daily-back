@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Activity extends Model
 {
+    use HasFactory;
 
     protected $fillable = ['time', 'type'];
-
-    use HasFactory;
 
     public function child()
     {
