@@ -38,7 +38,7 @@ class ConsumptionPolicy
      */
     public function update(User $user, Consumption $consumption): bool
     {
-        //
+        return $consumption->activity->child->family->adults->contains($user);
     }
 
     /**

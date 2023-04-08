@@ -43,7 +43,11 @@ class ConsumptionController extends Controller
      */
     public function update(UpdateConsumptionRequest $request, Consumption $consumption)
     {
-        //
+        $this->authorize('update', $consumption);
+
+        $consumption->volume = $request['volume'];
+        $consumption->name = $request['name'];
+        $consumption->save();
     }
 
     /**

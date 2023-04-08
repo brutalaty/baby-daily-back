@@ -14,7 +14,8 @@ class UpdateConsumptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'volume' => 'integer|required|between:0,100',
+            'name'  => 'string|required'
         ];
     }
 }
