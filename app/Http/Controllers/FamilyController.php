@@ -86,8 +86,10 @@ class FamilyController extends Controller
      * @param  \App\Models\family  $family
      * @return \Illuminate\Http\Response
      */
-    public function destroy(family $family)
+    public function destroy(User $user, family $family)
     {
-        //
+        $this->authorize('delete', $family);
+
+        $family->delete();
     }
 }

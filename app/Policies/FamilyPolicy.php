@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\User;
 use App\Models\family;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class FamilyPolicy
 {
@@ -84,9 +85,15 @@ class FamilyPolicy
      * @param  \App\Models\family  $family
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, family $family)
+    public function delete(User $user, family $family): Response
     {
-        return $family->adults->contains($user);
+        if ($family->children->isNotEmpty()) {
+            return Response::denyWithStatus(422, 'A Family that contains Children cannot be deleted.');
+        }
+
+        return $family->isManager($user)
+            ? Response::allow()
+            : Response::deny('You must be the manager to delete this family');
     }
 
     /**
