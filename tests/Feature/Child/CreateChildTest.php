@@ -19,7 +19,7 @@ class CreateChildTest extends TestCase
   {
     parent::setUp();
 
-    $this->dateInThePast = $this->date_string_from_today_subtracting('1 year 2 months 15 days');
+    $this->dateInThePast = now()->subYear(2)->format('Y-m-d');
   }
 
   /** @test */

@@ -68,7 +68,7 @@ class UnitFamilyTest extends TestCase
     public function a_family_has_a_function_to_create_a_child()
     {
         $this->assertCount(0, $this->family->children);
-        $birthdate = $this->date_string_from_today_subtracting('2 years');
+        $birthdate = now()->subYear(2)->format('Y-m-d');
         $this->family->addNewChild('Baby Cakes', $birthdate);
 
         $this->family->refresh();
