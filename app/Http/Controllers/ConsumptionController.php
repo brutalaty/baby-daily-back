@@ -61,6 +61,8 @@ class ConsumptionController extends Controller
      */
     public function destroy(Consumption $consumption)
     {
-        //
+        $this->authorize('delete', $consumption);
+
+        $consumption->delete();
     }
 }

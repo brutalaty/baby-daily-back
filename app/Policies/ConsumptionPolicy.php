@@ -46,7 +46,7 @@ class ConsumptionPolicy
      */
     public function delete(User $user, Consumption $consumption): bool
     {
-        //
+        return $consumption->activity->child->family->adults->contains($user);
     }
 
     /**

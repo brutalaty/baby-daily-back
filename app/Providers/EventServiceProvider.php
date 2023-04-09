@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Observers\UserObserver;
 use App\Models\Child;
 use App\Observers\ChildObserver;
+use App\Models\Activity;
+use App\Observers\ActivityObserver;
 
 use App\Events\InvitationCreated;
 use App\Listeners\SendInvitationEmail;
@@ -40,6 +42,7 @@ class EventServiceProvider extends ServiceProvider
     {
         User::observe(UserObserver::class);
         Child::observe(ChildObserver::class);
+        Activity::observe(ActivityObserver::class);
     }
 
     /**
