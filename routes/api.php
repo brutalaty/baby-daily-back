@@ -45,7 +45,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->only(['index', 'update']);
 
     //childrens activities
-    Route::apiResource('children.activities', ActivityController::class)->only(['store', 'update'])->shallow();
+    Route::apiResource('children.activities', ActivityController::class)->only(['store', 'update', 'destroy'])->shallow();
     //activity consumptions
     Route::apiResource('activities.consumptions', ConsumptionController::class)->only(['store', 'update'])->shallow();
 });

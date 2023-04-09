@@ -47,7 +47,7 @@ class ActivityPolicy
      */
     public function delete(User $user, Activity $activity): bool
     {
-        //
+        return $activity->child->family->adults->contains($user);
     }
 
     /**
