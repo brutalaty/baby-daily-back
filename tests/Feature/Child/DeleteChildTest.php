@@ -34,9 +34,12 @@ class DeleteChildTest extends TestCase
   public function managers_can_delete_children_from_their_family()
   {
     $this->actingAs($this->manager);
+
     $this->assertTrue($this->family->children->contains($this->child));
-    $this->deleteJson(route('children.destroy', $this->child))->assertSuccessful();
-    $this->assertFalse($this->family->fresh()->children->contains($this->child));
+
+    $this->deleteJson(route('children.destroy', $this->child));
+
+    $this->assertModelMissing($this->child);
   }
 
   /** @test */
