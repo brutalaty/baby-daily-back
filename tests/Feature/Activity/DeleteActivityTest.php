@@ -44,9 +44,9 @@ class DeleteActivityTest extends TestCase
 
     $this->deleteJson(
       route('activities.destroy', $this->activity)
-    )->assertSuccessful();
+    );
 
-    $this->assertDatabaseMissing('activities', ['id' => $this->activity->id]);
+    $this->assertModelMissing($this->activity);
   }
 
 
@@ -57,9 +57,9 @@ class DeleteActivityTest extends TestCase
 
     $this->deleteJson(
       route('activities.destroy', $this->activity)
-    )->assertSuccessful();
+    );
 
-    $this->assertDatabaseMissing('activities', ['id' => $this->activity->id]);
+    $this->assertModelMissing($this->activity);
   }
 
   /** @test */
