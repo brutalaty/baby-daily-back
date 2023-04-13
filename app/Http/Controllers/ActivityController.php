@@ -30,11 +30,10 @@ class ActivityController extends Controller
     {
         $this->authorize('create', [Activity::class, $child]);
 
-        $activity = new Activity([
-            'type' => $request['type'],
-            'time' => $request['time']
-        ]);
-        $child->activities()->save($activity);
+        $activity = $child->addNewActivity(
+            $request['type'],
+            $request['time']
+        );
 
         return new ActivityResource($activity);
     }

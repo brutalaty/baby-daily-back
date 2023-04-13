@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Activity;
-
+use DateTime;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,6 +23,14 @@ class Child extends Model
     public function activities()
     {
         return $this->hasMany(Activity::class);
+    }
+
+    public function addNewActivity(String $type, String $time)
+    {
+        return $this->activities()->save(new Activity([
+            'type' => $type,
+            'time' => $time
+        ]));
     }
 
     public function updateAvatar(String $filename)
