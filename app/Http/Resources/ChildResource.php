@@ -20,8 +20,6 @@ class ChildResource extends JsonResource
             "born" => $this->born,
             "family_id" => $this->family_id,
             "avatar" => $this->avatarUrl(),
-            "family_name" => $this->family->name,
-            "adults" => AdultResource::collection($this->family->adults)
         ];
     }
 }
