@@ -7,5 +7,9 @@ return [
     'wake' => 'wake',
     'eat' => 'eat',
     'medicine' => 'medicine'
+  ],
+  'complex_activities' => [ //the activities that can have consumptions
+    'eat' => 'eat',
+    'medicine' => 'medicine'
   ]
 ];

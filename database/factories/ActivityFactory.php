@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Child;
 
+use App\Services\Activities\ActivitiesFacade;
+
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,7 +23,7 @@ class ActivityFactory extends Factory
         return [
             'child_id' => Child::factory()->create()->id,
             'time' => now(),
-            'type' => config('enums.activities.poop')
+            'type' => ActivitiesFacade::getRandomActivityWithoutConsumptions()
         ];
     }
 }

@@ -24,6 +24,16 @@ class Activities
     return array_values(config('enums.activities'));
   }
 
+  public function getRandomActivityWithoutConsumptions()
+  {
+    return array_rand(
+      array_diff(
+        array_values(config('enums.activities')),
+        array_values(config('enums.complex_activities')),
+      )
+    );
+  }
+
   public function activitiesAsString()
   {
     return implode(', ', $this->activities()) . '.';
