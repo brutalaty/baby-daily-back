@@ -7,6 +7,8 @@ use App\Events\InvitationCreated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Facades\DB;
+
 class Family extends Model
 {
     use HasFactory;
@@ -39,12 +41,14 @@ class Family extends Model
 
     public function transferManager(User $from, User $to)
     {
-        $to->families()->updateExistingPivot($this->id, [
-            'manager' => 1,
-        ]);
-        $from->families()->updateExistingPivot($this->id, [
-            'manager' => 0,
-        ]);
+        DB::transaction(function () use ($from, $to) {
+            $to->families()->updateExistingPivot($this->id, [
+                'manager' => 1,
+            ]);
+            $from->families()->updateExistingPivot($this->id, [
+                'manager' => 0,
+            ]);
+        });
     }
 
     public function inviteAdult(User $sender, $email, $name, $relation): Invitation
