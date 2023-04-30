@@ -76,4 +76,14 @@ class UnitChildTest extends TestCase
         $this->assertCount(2, $this->child->activities);
         $this->assertInstanceOf(Activity::class, $this->child->activities->first());
     }
+
+    /** @test */
+    public function a_childs_age_function_shows_how_old_the_child_is()
+    {
+        $child1 = Child::factory()->create(['born' => now()->subYear(2)->subMonth(1)]);
+        $child2 = Child::factory()->create(['born' => now()->subMonth(2)->subWeek(2)]);
+
+        $this->assertEqualsIgnoringCase('2 years 1 month', $child1->age());
+        $this->assertEqualsIgnoringCase('2 months 2 weeks', $child2->age());
+    }
 }

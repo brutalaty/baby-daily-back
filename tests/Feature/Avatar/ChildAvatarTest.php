@@ -37,6 +37,7 @@ class ChildAvatarTest extends TestCase
     $this->actingAs($this->manager);
 
     $response = $this->getJson(route('children.show', $this->child));
+
     $response->assertJsonPath('data.avatar', fn ($avatar) => str_starts_with($avatar, 'http'));
   }
 

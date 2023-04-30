@@ -24,9 +24,8 @@ class ViewChildTest extends TestCase
     {
         parent::setUp();
         $this->user = $this->createUser();
-        $this->family = Family::factory()->create();
-        $this->family->addAdult($this->user, 'Father');
-        $this->child = Child::factory()->create();
+        $this->family = $this->user->createFamily(fake()->lastName(), "Father");
+        $this->child = $this->family->addNewChild(fake()->name(), now()->subYear(2));
     }
 
     /** @test */
@@ -68,11 +67,19 @@ class ViewChildTest extends TestCase
     public function a_user_can_get_a_child_that_they_are_related_to()
     {
         $this->actingAs($this->user);
-        $family = $this->user->createFamily('Test Family', 'Father');
-        $relatedChild = Child::factory()->create(['name' => 'Related Child', 'family_id' => $family]);
 
-        $response = $this->getJson(route('children.show', $relatedChild));
-        $response->assertSuccessful();
-        $response->assertJsonPath('data.name', $relatedChild->name);
+        $response = $this->getJson(route('children.show', $this->child));
+
+        $response->assertJsonPath('data.name', $this->child->name);
+    }
+
+    /** @test */
+    public function a_child_is_returned_with_their_age()
+    {
+        $this->actingAs($this->user);
+
+        $response = $this->getJson(route('children.show', $this->child));
+
+        $response->assertJsonPath('data.age', $this->child->age());
     }
 }
