@@ -16,6 +16,7 @@ class AdultResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'family_id' => $this->member->family_id,
             'name' => $this->name,
             'relation' => $this->member->relation,
             'manager' => $this->member->manager == 1 ? true : false,

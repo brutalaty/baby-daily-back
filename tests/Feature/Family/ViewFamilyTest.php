@@ -109,4 +109,20 @@ class ViewFamilyTest extends TestCase
 
         $this->getJson(route('families.index'))->assertJsonPath('data.0.invitations.0.name', $invitation->name);
     }
+
+    /** @test */
+    public function when_getting_families_the_adults_have_a_family_id()
+    {
+        $this->actingAs($this->user)
+            ->getJson(route('families.index'))
+            ->assertJson(
+                fn (AssertableJson $json) =>
+                $json->has(
+                    'data.0.adults.0',
+                    fn ($json) =>
+                    $json->where('family_id', $this->family->id)
+                        ->etc()
+                )
+            );
+    }
 }
